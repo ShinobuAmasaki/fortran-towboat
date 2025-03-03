@@ -1,23 +1,25 @@
-name: LLVM Flang Compiler Environment
+name: LLVM Base Environment
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'Dockerfile.llvm'
+      - '.github/workflows/llvm.yaml'
 
 jobs:
   base-llvm:
     runs-on: ubuntu-latest
-    env:
-      IMAGE_NAME: base-llvm-noble-ubuntu
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Set lowercase owner name
+      - name: Define env and set lowercase owner name
         run: |
           echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
         env:
           OWNER: '${{ github.repository_owner }}'
+          IMAGE_NAME: base-llvm-noble-ubuntu
 
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -37,9 +39,9 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.llvm
-          target: base-llvm-noble
+          target: base-llvm
+          platforms: "linux/amd64,linux/arm64"
           push: true
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:1.0.0
-       
