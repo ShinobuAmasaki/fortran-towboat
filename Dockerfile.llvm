@@ -1,0 +1,48 @@
+FROM ubuntu:24.04 AS base-llvm
+
+WORKDIR /work
+
+
+RUN apt update
+# To use add-apt-repository and lsb_release commands
+RUN apt install -y software-properties-common
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7EA0A9C3F273FCD8
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+# CMake repository
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 16FAAD7AF99A65E2
+RUN apt-add-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+
+# Building tools
+RUN apt update
+RUN apt install -y cmake curl git
+
+# Fortran Package Manager
+ENV fpm_version="0.10.1"
+RUN curl -sJLO https://github.com/fortran-lang/fpm/releases/download/v${fpm_version}/fpm-${fpm_version}-linux-x86_64
+RUN mv ./fpm-${fpm_version}-linux-x86_64 /usr/local/bin/fpm
+RUN chmod +x /usr/local/bin/fpm
+
+# LLVM repository
+RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 15CF4D18AF4F7421
+
+#==========================================================#
+
+FROM base-llvm AS flang-18
+RUN apt update
+RUN apt install -y flang-18 clang-18 clang-tools-18 clang-18-doc libclang-common-18-dev libclang-18-dev libclang1-18 clang-format-18 python3-clang-18 clangd-18 clang-tidy-18
+
+#==========================================================#
+
+FROM base-llvm AS flang-19
+RUN apt update
+RUN apt install -y flang-19 clang-19 clang-tools-19 clang-19-doc libclang-common-19-dev libclang-19-dev libclang1-19 clang-format-19 python3-clang-19 clangd-19 clang-tidy-19
+
+#==========================================================#
+
+FROM base-llvm AS flang-20
+RUN apt update
+RUN apt install -y flang-20 clang-20 clang-tools-20 clang-20-doc libclang-common-20-dev libclang-20-dev libclang1-20 clang-format-20 python3-clang-20 clangd-20 clang-tidy-20
