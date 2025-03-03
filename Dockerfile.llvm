@@ -1,4 +1,4 @@
-FROM ubuntu:24.04 AS base-llvm
+FROM ubuntu:24.04 AS base-llvm-noble
 
 WORKDIR /work
 
@@ -34,7 +34,7 @@ RUN rm -rf fpm-${fpm_version}.F90 *.mod
 
 #==========================================================#
 
-FROM base-llvm AS flang-18
+FROM base-llvm-noble AS flang-18
 RUN apt update
 ARG llvm_version="18"
 RUN apt install -y flang-18 clang-18 clang-tools-18 clang-18-doc \
@@ -46,7 +46,7 @@ ENV FPM_CXX=clang++-${llvm_version}
 
 #==========================================================#
 
-FROM base-llvm AS flang-19
+FROM base-llvm-noble AS flang-19
 RUN apt update
 ARG namellvm_version="19"
 RUN apt install -y flang-19 clang-19 clang-tools-19 clang-19-doc \
@@ -58,7 +58,7 @@ ENV FPM_CXX=clang++-${llvm_version}
     
 #==========================================================#
 
-FROM base-llvm AS flang-20
+FROM base-llvm-noble AS flang-20
 RUN apt update
 ARG llvm_version="20"
 RUN apt install -y flang-20 clang-20 clang-tools-20 clang-20-doc \
