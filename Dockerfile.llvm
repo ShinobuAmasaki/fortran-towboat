@@ -2,27 +2,30 @@ FROM ubuntu:24.04 AS base-llvm-noble
 
 WORKDIR /work
 
-RUN apt update
-# To use add-apt-repository and lsb_release commands
-RUN apt install -y software-properties-common
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7EA0A9C3F273FCD8
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+ENV release="noble"
+RUN apt update && apt install -y gpg curl
 
 # CMake repository
-RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 16FAAD7AF99A65E2
-RUN apt-add-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+RUN curl -s https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --no-default-keyring --keyring /tmp/kitware-keyring.gpg --import
+RUN gpg --no-default-keyring --keyring /tmp/kitware-keyring.gpg --export --output /usr/share/keyrings/kitware-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/kitware-keyring.gpg] https://apt.kitware.com/ubuntu/ ${release} main" | tee -a /etc/apt/sources.list.d/kitware.list
+
 
 # Building tools
-RUN apt update
-RUN apt install -y cmake curl git gfortran ninja-build
+RUN apt update && apt install -y cmake git gfortran ninja-build
 
 # LLVM repository
-RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main"
-RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"
-RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 15CF4D18AF4F7421
+RUN curl -s https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --no-default-keyring --keyring /tmp/llvm-keyring.gpg --import
+RUN gpg --no-default-keyring --keyring /tmp/llvm-keyring.gpg --export --output /usr/share/keyrings/llvm-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/llvm-keyring.gpg] http://apt.llvm.org/${release}/ llvm-toolchain-${release}-18 main" | tee -a /etc/apt/sources.list.d/llvm.list
+RUN echo "deb [signed-by=/usr/share/keyrings/llvm-keyring.gpg] http://apt.llvm.org/${release}/ llvm-toolchain-${release}-19 main" | tee -a /etc/apt/sources.list.d/llvm.list
+RUN echo "deb [signed-by=/usr/share/keyrings/llvm-keyring.gpg] http://apt.llvm.org/${release}/ llvm-toolchain-${release}-20 main" | tee -a /etc/apt/sources.list.d/llvm.list
+
+#RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+#RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main"
+#RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"
+#RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"
+#RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 15CF4D18AF4F7421
 
 # Fortran Package Manager (use gfortran to build fpm)
 ARG fpm_version="0.10.1"
@@ -31,40 +34,16 @@ RUN gfortran -o /usr/local/bin/fpm fpm-${fpm_version}.F90
 RUN chmod +x /usr/local/bin/fpm
 RUN rm -rf fpm-${fpm_version}.F90 *.mod
 
+#　Remove GCC
+RUN apt purge -y gfortran && apt autoremove -y && apt clean -y
 
 #==========================================================#
 
-FROM base-llvm-noble AS flang-18
+FROM base-llvm-noble AS flang
+ARG LLVM_VERSION="20"
 RUN apt update
-ARG llvm_version="18"
-RUN apt install -y flang-18 clang-18 clang-tools-18 clang-18-doc \
-    libclang-common-18-dev libclang-18-dev libclang1-18 clang-format-18 \
-    python3-clang-18 clangd-18 clang-tidy-18
-ENV FPM_FC=flang-new-${llvm_version}
-ENV FPM_CC=clang-${llvm_version}
-ENV FPM_CXX=clang++-${llvm_version}
-
-#==========================================================#
-
-FROM base-llvm-noble AS flang-19
-RUN apt update
-ARG namellvm_version="19"
-RUN apt install -y flang-19 clang-19 clang-tools-19 clang-19-doc \
-    libclang-common-19-dev libclang-19-dev libclang1-19 clang-format-19 \
-    python3-clang-19 clangd-19 clang-tidy-19
-ENV FPM_FC=flang-new-${llvm_version}
-ENV FPM_CC=clang-${llvm_version}
-ENV FPM_CXX=clang++-${llvm_version}
-    
-#==========================================================#
-
-FROM base-llvm-noble AS flang-20
-RUN apt update
-ARG llvm_version="20"
-RUN apt install -y flang-20 clang-20 clang-tools-20 clang-20-doc \
-    libclang-common-20-dev libclang-20-dev libclang1-20 clang-format-20 \
-    python3-clang-20 clangd-20 clang-tidy-20
-ENV FPM_FC=flang-new-${llvm_version}
-ENV FPM_CC=clang-${llvm_version}
-ENV FPM_CXX=cclang++-${llvm_version}
+RUN apt install -y --no-install-recommends flang-${LLVM_VERSION} clang-${LLVM_VERSION} 
+ENV FPM_FC=flang-new-${LLVM_VERSION}
+ENV FPM_CC=clang-${LLVM_VERSION}
+ENV FPM_CXX=cclang++-${LLVM_VERSION}
     
