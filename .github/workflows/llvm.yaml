@@ -12,14 +12,14 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+    env:
+      IMAGE_NAME: base-llvm-noble-ubuntu
     steps:
       - name: Define env and set lowercase owner name
         run: |
           echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
         env:
           OWNER: '${{ github.repository_owner }}'
-          IMAGE_NAME: base-llvm-noble-ubuntu
 
       - name: Checkout repository
         uses: actions/checkout@v3

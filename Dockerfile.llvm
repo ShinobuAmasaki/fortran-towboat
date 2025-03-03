@@ -10,7 +10,6 @@ RUN curl -s https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --no-d
 RUN gpg --no-default-keyring --keyring /tmp/kitware-keyring.gpg --export --output /usr/share/keyrings/kitware-keyring.gpg
 RUN echo "deb [signed-by=/usr/share/keyrings/kitware-keyring.gpg] https://apt.kitware.com/ubuntu/ ${release} main" | tee -a /etc/apt/sources.list.d/kitware.list
 
-
 # Building tools
 RUN apt update && apt install -y cmake git gfortran ninja-build
 
@@ -21,18 +20,12 @@ RUN echo "deb [signed-by=/usr/share/keyrings/llvm-keyring.gpg] http://apt.llvm.o
 RUN echo "deb [signed-by=/usr/share/keyrings/llvm-keyring.gpg] http://apt.llvm.org/${release}/ llvm-toolchain-${release}-19 main" | tee -a /etc/apt/sources.list.d/llvm.list
 RUN echo "deb [signed-by=/usr/share/keyrings/llvm-keyring.gpg] http://apt.llvm.org/${release}/ llvm-toolchain-${release}-20 main" | tee -a /etc/apt/sources.list.d/llvm.list
 
-#RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-#RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main"
-#RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-19 main"
-#RUN add-apt-repository -y "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main"
-#RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 15CF4D18AF4F7421
-
 # Fortran Package Manager (use gfortran to build fpm)
-ARG fpm_version="0.10.1"
-RUN curl -sJLO https://github.com/fortran-lang/fpm/releases/download/v${fpm_version}/fpm-${fpm_version}.F90
-RUN gfortran -o /usr/local/bin/fpm fpm-${fpm_version}.F90
+ARG FPM_VERSION="0.10.1"
+RUN curl -sJLO https://github.com/fortran-lang/fpm/releases/download/v${FPM_VERSION}/fpm-${FPM_VERSION}.F90
+RUN gfortran -o /usr/local/bin/fpm fpm-${FPM_VERSION}.F90
 RUN chmod +x /usr/local/bin/fpm
-RUN rm -rf fpm-${fpm_version}.F90 *.mod
+RUN rm -rf fpm-${FPM_VERSION}.F90 *.mod
 
 #　Remove GCC
 RUN apt purge -y gfortran && apt autoremove -y && apt clean -y
@@ -46,4 +39,3 @@ RUN apt install -y --no-install-recommends flang-${LLVM_VERSION} clang-${LLVM_VE
 ENV FPM_FC=flang-new-${LLVM_VERSION}
 ENV FPM_CC=clang-${LLVM_VERSION}
 ENV FPM_CXX=cclang++-${LLVM_VERSION}
-    
