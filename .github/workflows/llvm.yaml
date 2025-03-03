@@ -39,6 +39,6 @@ jobs:
           file: ./Dockerfile.llvm
           push: false
           tags: |
-            ghcr.io/${OWNER_LC}/${{ env.IMAGE_NAME }}:latest
-            ghcr.io/${OWNER_LC}/${{ env.IMAGE_NAME }}:1.0.0
+            ghcr.io/${{OWNER_LC}}/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{OWNER_LC}}/${{ env.IMAGE_NAME }}:1.0.0
        
