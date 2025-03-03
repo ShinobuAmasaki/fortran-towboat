@@ -39,7 +39,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.llvm
-          target: base-llvm
+          target: base-llvm-noble
           platforms: "linux/amd64,linux/arm64"
           push: true
           tags: |
