@@ -4,4 +4,5 @@ RUN apt update
 RUN apt install -y --no-install-recommends flang-${LLVM_VERSION} clang-${LLVM_VERSION} 
 ENV FPM_FC=flang-new-${LLVM_VERSION}
 ENV FPM_CC=clang-${LLVM_VERSION}
-ENV FPM_CXX=cclang++-${LLVM_VERSION}
+ENV CMAKE_Fortran_COMPILER=flang-${LLVM_VERSION}
+ENV CMAKE_C_COMPILER=clang-${LLVM_VERSION}
