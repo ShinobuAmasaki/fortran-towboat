@@ -29,7 +29,8 @@ RUN chmod +x /usr/local/bin/fpm
 RUN rm -rf fpm-${FPM_VERSION}.F90 *.mod
 
 #　Remove GCC
-RUN apt purge -y gfortran && apt autoremove -y && apt clean -y
+RUN apt autoremove -y && apt clean -y
+# Do not purge gfortran.
 
 #==========================================================#
 
