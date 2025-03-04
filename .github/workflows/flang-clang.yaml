@@ -1,7 +1,7 @@
 name: LLVM Flang Environment
 on:
   workflow_run:
-    workflows: ["LLVM Base Environment"]
+    workflows: [ "LLVM Base Environment" ]
     types:
       - completed
   push:
@@ -14,25 +14,30 @@ on:
 jobs:
   flang-clang:
     if: success() || github.event_name == 'push'
-    runs-on: ghcr.io/shinobuamasaki/base-llvm-noble-ubuntu:latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    env:
-      IMAGE_NAME: flang-${{ matrix.version }}-noble-ubuntu
     strategy:
       matrix:
-        version: [18,19,20] # LLVM version number
+        version: [18]
+        # LLVM version number
+    container:
+      image: ghcr.io/shinobuamasaki/base-llvm-noble-ubuntu:latest 
+    env:
+      IMAGE_NAME: flang-${{ matrix.version }}-noble-ubuntu
     steps:
       - name: Define env and set lowercase owner name
+        shell: bash
         run: |
+          # echo "OWNER_LC=$(echo "${OWNER}" | tr 'A-Z' 'a-z')" >>${GITHUB_ENV}
           echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
         env:
           OWNER: '${{ github.repository_owner }}'
 
       - name: Checkout repository
         uses: actions/checkout@v3
-      
+            
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

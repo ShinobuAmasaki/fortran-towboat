@@ -3,7 +3,7 @@ FROM ubuntu:24.04 AS base-llvm-noble
 WORKDIR /work
 
 ENV release="noble"
-RUN apt update && apt install -y gpg curl
+RUN apt update && apt install -y --no-install-recommends gpg curl
 
 # CMake repository
 RUN curl -s https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --no-default-keyring --keyring /tmp/kitware-keyring.gpg --import
@@ -12,6 +12,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/kitware-keyring.gpg] https://apt.ki
 
 # Building tools
 RUN apt update && apt install -y cmake git gfortran ninja-build
+# The --no-install-recommend option shall not be placed here.
 
 # LLVM repository
 RUN curl -s https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --no-default-keyring --keyring /tmp/llvm-keyring.gpg --import
