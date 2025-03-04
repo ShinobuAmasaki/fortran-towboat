@@ -24,13 +24,16 @@ jobs:
         # LLVM version number
     container:
       image: ghcr.io/shinobuamasaki/base-llvm-noble-ubuntu:latest 
+    services:
+      docker:
+        image: docker:24.0.5-dind
+        options: --privileged
     env:
       IMAGE_NAME: flang-${{ matrix.version }}-noble-ubuntu
     steps:
       - name: Define env and set lowercase owner name
         shell: bash
         run: |
-          # echo "OWNER_LC=$(echo "${OWNER}" | tr 'A-Z' 'a-z')" >>${GITHUB_ENV}
           echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
         env:
           OWNER: '${{ github.repository_owner }}'
