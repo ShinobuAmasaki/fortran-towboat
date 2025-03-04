@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
-    - 'Dockerfile.llvm'
+    - 'Dockerfile.flang'
     - '.github/workflows/flang-clang.yaml'
   
 
@@ -20,7 +20,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        version: [18]
+        version: [18, 19, 20]
         # LLVM version number
     container:
       image: ghcr.io/shinobuamasaki/base-llvm-noble-ubuntu:latest 
@@ -59,7 +59,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile.llvm
+          file: ./Dockerfile.flang
           target: flang
           platforms: "linux/amd64,linux/arm64"
           push: true
