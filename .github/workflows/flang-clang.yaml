@@ -29,8 +29,7 @@ jobs:
     steps:
       - name: Install Docker CLI
         run: |
-          apt-get update
-          apt-get install -y docker.io
+          apt update && apt install -y docker.io
       - name: Check Docker version
         run: docker --version
         
