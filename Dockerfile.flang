@@ -1,0 +1,7 @@
+FROM ghcr.io/shinobuamasaki/base-llvm-noble-ubuntu:latest AS flang
+ARG LLVM_VERSION="20"
+RUN apt update
+RUN apt install -y --no-install-recommends flang-${LLVM_VERSION} clang-${LLVM_VERSION} 
+ENV FPM_FC=flang-new-${LLVM_VERSION}
+ENV FPM_CC=clang-${LLVM_VERSION}
+ENV FPM_CXX=cclang++-${LLVM_VERSION}

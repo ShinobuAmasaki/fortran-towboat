@@ -33,7 +33,8 @@ RUN apt purge -y gfortran && apt autoremove -y && apt clean -y
 
 #==========================================================#
 
-FROM base-llvm-noble AS flang
+# docker buildx on localhost.
+FROM base-llvm-noble-ubuntu:latest AS flang-local
 ARG LLVM_VERSION="20"
 RUN apt update
 RUN apt install -y --no-install-recommends flang-${LLVM_VERSION} clang-${LLVM_VERSION} 
